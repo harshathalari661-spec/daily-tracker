@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>💪 GYM BEAST 100-Day Tracker</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Arial Black', Impact, sans-serif; 
+            background: linear-gradient(135deg, #1a1a1a, #2d2d2d, #4a4a4a);
+            min-height: 100vh; color: #fff;
+        }
+        
+        /* LOGIN PAGE */
+        .auth-container { 
+            display: flex; justify-content: center; align-items: center; 
+            min-height: 100vh; padding: 20px; 
+            background: linear-gradient(135deg, #ff4500, #ff8c00);
+        }
+        .auth-box {
+            background: linear-gradient(145deg, #2a2a2a, #1f1f1f); 
+            border: 3px solid #666; border-radius: 25px; padding: 40px; 
+            box-shadow: 0 25px 70px rgba(0,0,0,0.8); max-width: 450px; width: 100%;
+            text-align: center;
+        }
+        .auth-tabs { 
+            display: flex; background: #333; border-radius: 15px; margin-bottom: 30px; 
+            overflow: hidden; box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+        }
+        .tab-btn { 
+            flex: 1; padding: 15px 20px; border: none; background: none; 
+            color: #ccc; font-weight: 700; font-size: 16px; cursor: pointer;
+            transition: all 0.3s;
+        }
+        .tab-btn.active { 
+            background: linear-gradient(45deg, #32cd32, #ffd700); color: #000; 
+            transform: scale(1.05);
+        }
+        .auth-form { display: none; }
+        .auth-form.active { display: block; }
+        .auth-input { 
+            width: 100%; padding: 18px; margin: 15px 0; border-radius: 12px; 
+            border: 2px solid #555; background: #333; color: #fff; font-size: 18px;
+        }
+        .auth-btn { 
+            width: 100%; background: linear-gradient(45deg, #32cd32, #ffd700); 
+            color: #000; border: none; padding: 20px; border-radius: 15px; 
+            font-size: 1.4em; font-weight: 900; cursor: pointer; margin: 15px 0;
+            text-transform: uppercase;
+        }
+        .error { color: #ff4500; font-weight: 700; margin: 15px 0; }
+        .success { color: #32cd32; font-weight: 700; margin: 15px 0; }
+        
+        /* TRACKER PAGE */
+        .tracker-page { display: none; padding: 10px; min-height: 100vh; }
+        .logout-btn { position: fixed; top: 15px; right: 15px; background: #ff4500; color: white; border: none; padding: 12px 20px; border-radius: 25px; font-weight: 700; cursor: pointer; z-index: 1000; }
+        .user-info { position: fixed; top: 15px; left: 15px; background: rgba(0,0,0,0.8); padding: 10px 20px; border-radius: 25px; font-weight: 700; }
+        
+        /* GYM TRACKER STYLES */
+        .container { max-width: 1000px; margin: 40px auto 20px; background: linear-gradient(145deg, #2a2a2a, #1f1f1f); border: 3px solid #666; border-radius: 20px; padding: 25px; box-shadow: 0 20px 60px rgba(0,0,0,0.8); }
+        .challenge-info { text-align: center; background: linear-gradient(135deg, #ff4500, #ff8c00); padding: 20px; border-radius: 15px; margin-bottom: 20px; box-shadow: 0 8px 25px rgba(255,69,0,0.4); }
+        .header { text-align: center; margin-bottom: 25px; }
+        .streak-display { font-size: 3em; font-weight: 900; margin: 15px 0; background: linear-gradient(45deg, #32cd32, #ffd700, #ff4500); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-shadow: 0 0 30px currentColor; letter-spacing: 2px; }
+        .month-nav { display: flex; justify-content: space-between; align-items: center; margin: 20px 0; }
+        .nav-btn { background: linear-gradient(45deg, #666, #999); color: #fff; border: none; padding: 12px 20px; border-radius: 25px; cursor: pointer; font-weight: 700; text-transform: uppercase; transition: all 0.3s; }
+        .nav-btn:hover { background: linear-gradient(45deg, #ff4500, #ff8c00); transform: translateY(-2px); }
+        .month-title { font-size: 2em; font-weight: 900; background: linear-gradient(45deg, #32cd32, #ffd700); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .calendar-container { background: linear-gradient(145deg, #333, #222); border-radius: 20px; padding: 25px; border: 2px solid #555; margin-bottom: 25px; box-shadow: 0 15px 40px rgba(0,0,0,0.5); }
+        .calendar { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; }
+        .weekday { font-weight: 900; color: #ffd700; text-align: center; padding: 15px 5px; background: linear-gradient(135deg, #444, #666); border-radius: 10px; text-transform: uppercase; border: 2px solid #888; }
+        .day { aspect-ratio: 1; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 16px; cursor: pointer; transition: all 0.3s; border: 3px solid #555; background: #1a1a1a; }
+        .day:hover { transform: scale(1.1); border-color: #ff4500; box-shadow: 0 8px 25px rgba(255,69,0,0.5); }
+        .streak-1 { background: linear-gradient(135deg, #666, #888); color: #fff; border-color: #aaa; }
+        .streak-2 { background: linear-gradient(135deg, #32cd32, #228b22); color: #fff; border-color: #32cd32; }
+        .streak-3 { background: linear-gradient(135deg, #ffd700, #ff8c00); color: #000; border-color: #ffd700; }
+        .streak-4 { background: linear-gradient(135deg, #ff4500, #ff8c00); color: #fff; border-color: #ff4500; }
+        .streak-5, .streak-6 { background: linear-gradient(135deg, #ff1493, #ff69b4); color: #fff; border-color: #ff1493; animation: gymPulse 1s infinite; box-shadow: 0 0 20px rgba(255,20,147,0.8); }
+        @keyframes gymPulse { 0%, 100% { box-shadow: 0 0 10px rgba(255,20,147,0.6); transform: scale(1); } 50% { box-shadow: 0 0 25px rgba(255,20,147,1); transform: scale(1.05); } }
+        .today { border-color: #ffd700 !important; background: linear-gradient(135deg, #ffd700, #ff8c00) !important; color: #000; transform: scale(1.05); }
+        .future { color: #666; background: #111; }
+        .missed { background: linear-gradient(135deg, #8b0000, #b22222); border-color: #dc143c; }
+        .start-day { border-color: #32cd32; background: linear-gradient(135deg, #32cd32, #228b22) !important; }
+        .tasks-section { background: linear-gradient(135deg, #1a1a1a, #333); color: #fff; padding: 25px; border-radius: 20px; border: 3px solid #666; box-shadow: 0 15px 40px rgba(0,0,0,0.6); margin-top: 20px; }
+        .tasks { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 20px; }
+        .task-item { background: linear-gradient(145deg, #2a2a2a, #1f1f1f); padding: 18px; border-radius: 15px; border: 2px solid #555; transition: all 0.3s; cursor: pointer; box-shadow: 0 8px 20px rgba(0,0,0,0.4); }
+        .task-item:hover { border-color: #ff4500; transform: translateY(-3px); }
+        .task-item.completed { background: linear-gradient(135deg, #32cd32, #228b22) !important; border-color: #32cd32 !important; transform: scale(1.02); box-shadow: 0 10px 30px rgba(50,205,50,0.6); }
+        .task-item input[type="checkbox"] { transform: scale(1.8); margin-right: 12px; accent-color: #ff4500; }
+        .save-btn { width: 100%; background: linear-gradient(45deg, #ff4500, #ff8c00); color: #fff; border: 3px solid #ffd700; padding: 20px; border-radius: 20px; font-size: 1.4em; font-weight: 900; cursor: pointer; text-transform: uppercase; margin-top: 25px; transition: all 0.4s; }
+        .save-btn:hover:not(:disabled) { background: linear-gradient(45deg, #ffd700, #ff4500); transform: translateY(-5px); box-shadow: 0 20px 40px rgba(255,69,0,0.6); }
+        .save-btn:disabled { opacity: 0.7; cursor: not-allowed; background: #666; }
+        .status { text-align: center; font-size: 1.3em; margin-top: 20px; font-weight: 800; text-transform: uppercase; }
+        .status.success { color: #32cd32; text-shadow: 0 0 20px currentColor; }
+        @media (max-width: 768px) { .container { margin: 20px auto; padding: 20px; } .streak-display { font-size: 2.5em; } .tasks { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+    <!-- LOGIN PAGE -->
+    <div id="authPage" class="auth-container">
+        <div class="auth-box">
+            <h1 style="color: #ffd700; margin-bottom: 20px; font-size: 2.2em;">💪 GYM BEAST</h1>
+            <div class="auth-tabs">
+                <button class="tab-btn active" onclick="switchTab('login')">LOGIN</button>
+                <button class="tab-btn" onclick="switchTab('signup')">CREATE</button>
+            </div>
+            <div id="loginForm" class="auth-form active">
+                <input type="text" class="auth-input" id="loginUser" placeholder="Username">
+                <input type="password" class="auth-input" id="loginPass" placeholder="Password">
+                <button class="auth-btn" onclick="handleLogin()">🔐 LOGIN</button>
+                <div id="loginStatus" class="error"></div>
+            </div>
+            <div id="signupForm" class="auth-form">
+                <input type="text" class="auth-input" id="signupUser" placeholder="New Username">
+                <input type="password" class="auth-input" id="signupPass" placeholder="Password">
+                <input type="password" class="auth-input" id="signupConfirm" placeholder="Confirm Password">
+                <button class="auth-btn" onclick="handleSignup()">✅ CREATE ACCOUNT</button>
+                <div id="signupStatus" class="error"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- GYM TRACKER (HIDDEN UNTIL LOGIN) -->
+    <div id="trackerPage" class="tracker-page">
+        <button class="logout-btn" onclick="logout()">🚪 LOGOUT</button>
+        <div class="user-info">👤 <span id="currentUser"></span></div>
+        
+        <div class="container">
+            <div class="challenge-info">
+                <div class="challenge-dates">💪 Jan 2026 - Dec 2027 | BEAST MODE</div>
+                <div>Day <span id="challenge-day">7</span> | 🔥 Streak: <span id="streak-count">6</span></div>
+            </div>
+            
+            <div class="header">
+                <h1>🏋️ GYM BEAST TRACKER</h1>
+                <div class="streak-display" id="streak-display">STREAK: 6 DAYS</div>
+            </div>
+            
+            <div class="calendar-container">
+                <div class="month-nav">
+                    <button class="nav-btn" onclick="prevMonth()">⬅️ PREV</button>
+                    <div class="month-title" id="month-title">JANUARY 2026</div>
+                    <button class="nav-btn" onclick="nextMonth()">NEXT ➡️</button>
+                </div>
+                <div class="calendar" id="calendar"></div>
+            </div>
+            
+            <div class="tasks-section">
+                <h3 style="text-align: center; margin-bottom: 20px; color: #ffd700;">⚡ TODAY'S GRIND - Hit <span id="next-streak">7</span>🔥</h3>
+                <div class="tasks">
+                    <div class="task-item" onclick="toggleTask('wokeup')">
+                        <label style="display:flex; align-items:center; cursor:pointer; width:100%;">
+                            <input type="checkbox" id="wokeup"> ☀️ 7 AM Woke Up
+                        </label>
+                    </div>
+                    <div class="task-item" onclick="toggleTask('breakfast')">
+                        <label style="display:flex; align-items:center; cursor:pointer; width:100%;">
+                            <input type="checkbox" id="breakfast"> 🍳 Breakfast
+                        </label>
+                    </div>
+                    <div class="task-item" onclick="toggleTask('lunch')">
+                        <label style="display:flex; align-items:center; cursor:pointer; width:100%;">
+                            <input type="checkbox" id="lunch"> 🍗 Lunch
+                        </label>
+                    </div>
+                    <div class="task-item" onclick="toggleTask('gym')">
+                        <label style="display:flex; align-items:center; cursor:pointer; width:100%;">
+                            <input type="checkbox" id="gym"> 💪 Gym
+                        </label>
+                    </div>
+                    <div class="task-item" onclick="toggleTask('steps')">
+                        <label style="display:flex; align-items:center; cursor:pointer; width:100%;">
+                            <input type="checkbox" id="steps"> 🚶 10k Steps
+                        </label>
+                    </div>
+                    <div class="task-item" onclick="toggleTask('water')">
+                        <label style="display:flex; align-items:center; cursor:pointer; width:100%;">
+                            <input type="checkbox" id="water"> 💧 4L Water
+                        </label>
+                    </div>
+                    <div class="task-item" onclick="toggleTask('dinner')">
+                        <label style="display:flex; align-items:center; cursor:pointer; width:100%;">
+                            <input type="checkbox" id="dinner"> 🍽️ Dinner
+                        </label>
+                    </div>
+                </div>
+                <button class="save-btn" id="save-btn" onclick="saveDay()">⚡ SAVE GRIND → STREAK 7🔥</button>
+                <div class="status" id="status">COMPLETE ALL 7 → UNLOCK BEAST MODE!</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const TASKS = ['wokeup', 'breakfast', 'lunch', 'gym', 'steps', 'water', 'dinner'];
+        const START_DATE = new Date('2026-01-05');
+        let currentMonth = 0, currentYear = 2026, currentUser = null;
+        const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        const weekdays = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
+
+        // AUTH FUNCTIONS
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.auth-form').forEach(form => form.classList.remove('active'));
+            event.target.classList.add('active');
+            document.getElementById(tab + 'Form').classList.add('active');
+        }
+
+        function showStatus(id, message, type = 'error') {
+            const status = document.getElementById(id);
+            status.textContent = message;
+            status.className = type;
+        }
+
+        function handleSignup() {
+            const username = document.getElementById('signupUser').value.trim();
+            const password = document.getElementById('signupPass').value;
+            const confirm = document.getElementById('signupConfirm').value;
+            
+            if (password !== confirm || !username || !password) {
+                showStatus('signupStatus', '❌ Fill all fields & match passwords!');
+                return;
+            }
+            if (localStorage.getItem(`gymbeast_${username}`)) {
+                showStatus('signupStatus', '❌ Username taken!');
+                return;
+            }
+            
+            localStorage.setItem(`gymbeast_${username}`, JSON.stringify({username, password}));
+            showStatus('signupStatus', '✅ Account created! Login now →', 'success');
+            setTimeout(() => switchTab('login'), 1500);
+        }
+
+        function handleLogin() {
+            const username = document.getElementById('loginUser').value.trim();
+            const password = document.getElementById('loginPass').value;
+            
+            const userData = localStorage.getItem(`gymbeast_${username}`);
+            if (!userData || JSON.parse(userData).password !== password) {
+                showStatus('loginStatus', '❌ Wrong credentials!');
+                return;
+            }
+            
+            currentUser = username;
+            document.getElementById('currentUser').textContent = username;
+            document.getElementById('authPage').style.display = 'none';
+            document.getElementById('trackerPage').style.display = 'block';
+            initializeTracker();
+        }
+
+        function logout() {
+            currentUser = null;
+            document.getElementById('trackerPage').style.display = 'none';
+            document.getElementById('authPage').style.display = 'flex';
+            document.querySelector('.tab-btn').click();
+        }
+
+        // TRACKER FUNCTIONS
+        function getUserPrefix() { return `gymbeast_${currentUser}_`; }
+        function getTodayKey() { const d = new Date(); d.setHours(0,0,0,0); return getUserPrefix() + d.toDateString(); }
+
+        function seedInitialStreak() {
+            const dates = ['2026-01-05','2026-01-06','2026-01-07','2026-01-08','2026-01-09','2026-01-10'];
+            dates.forEach(dateStr => localStorage.setItem(getUserPrefix() + dateStr + '_complete', 'true'));
+        }
+
+        function calculateStreak() {
+            let streak = 0, date = new Date(getTodayKey().replace(getUserPrefix(), ''));
+            while (localStorage.getItem(getUserPrefix() + date.toDateString() + '_complete')) {
+                streak++; date.setDate(date.getDate() - 1);
+                if (streak > 365) break;
+            }
+            return streak;
+        }
+
+        function initializeTracker() {
+            seedInitialStreak();
+            updateDisplay();
+            loadCalendar();
+            loadTasks();
+        }
+
+        function toggleTask(taskId) {
+            const cb = document.getElementById(taskId);
+            cb.checked = !cb.checked;
+            cb.closest('.task-item').classList.toggle('completed', cb.checked);
+            updateSaveButton();
+        }
+
+        function updateSaveButton() {
+            const allComplete = TASKS.every(t => document.getElementById(t).checked);
+            const todayComplete = localStorage.getItem(getTodayKey() + '_complete');
+            const btn = document.getElementById('save-btn');
+            
+            btn.disabled = !!todayComplete;
+            btn.textContent = todayComplete ? '✅ SAVED!' : `⚡ SAVE → STREAK ${calculateStreak() + 1}🔥`;
+            if (!allComplete && !todayComplete) btn.disabled = true;
+        }
+
+        function saveDay() {
+            const todayKey = getTodayKey();
+            TASKS.forEach(task => localStorage.setItem(todayKey, JSON.stringify({[task]: true})));
+            localStorage.setItem(todayKey + '_complete', 'true');
+            
+            const streak = calculateStreak();
+            document.body.classList.add('streak-celebration');
+            document.getElementById('status').innerHTML = `💥 BEAST MODE! ${streak} DAYS 🔥`;
+            document.getElementById('status').className = 'status success';
+            document.getElementById('streak-display').textContent = `STREAK: ${streak} DAYS`;
+            document.getElementById('save-btn').textContent = `✅ ${streak} DAY BEAST!`;
+            document.getElementById('save-btn').disabled = true;
+            setTimeout(() => document.body.classList.remove('streak-celebration'), 4000);
+        }
+
+        function updateDisplay() {
+            const streak = calculateStreak();
+            document.getElementById('streak-count').textContent = streak;
+            document.getElementById('next-streak').textContent = streak + 1;
+            document.getElementById('challenge-day').textContent = 7;
+        }
+
+        function loadTasks() {
+            const todayKey = getTodayKey();
+            const saved = JSON.parse(localStorage.getItem(todayKey) || '{}');
+            TASKS.forEach(task => {
+                const cb = document.getElementById(task);
+                cb.checked = !!saved[task];
+                cb.closest('.task-item').classList.toggle('completed', cb.checked);
+            });
+            updateSaveButton();
+        }
+
+        function loadCalendar() {
+            const cal = document.getElementById('calendar');
+            cal.innerHTML = '';
+            weekdays.forEach(day => {
+                const div = document.createElement('div');
+                div.className = 'weekday';
+                div.textContent = day;
+                cal.appendChild(div);
+            });
+            
+            const firstDay = new Date(currentYear, currentMonth, 1).getDay();
+            const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+            
+            for (let i = 0; i < firstDay; i++) {
+                cal.innerHTML += '<div></div>';
+            }
+            
+            for (let day = 1; day <= daysInMonth; day++) {
+                const date = new Date(currentYear, currentMonth, day);
+                const dateKey = getUserPrefix() + date.toDateString();
+                const div = document.createElement('div');
+                div.className = 'day';
+                div.textContent = day;
+                
+                if (localStorage.getItem(dateKey + '_complete')) {
+                    const streak = calculateStreakForDate(date.toDateString());
+                    div.classList.add(`streak-${Math.min(streak, 6)}`);
+                } else if (date.toDateString() === new Date(getTodayKey().replace(getUserPrefix(), '')).toDateString()) {
+                    div.classList.add('today');
+                } else if (date < new Date()) {
+                    div.classList.add('missed');
+                } else {
+                    div.classList.add('future');
+                }
+                
+                if (date.toDateString() === START_DATE.toDateString()) div.classList.add('start-day');
+                div.title = date.toDateString();
+                cal.appendChild(div);
+            }
+            document.getElementById('month-title').textContent = `${monthNames[currentMonth].toUpperCase()} ${currentYear}`;
+        }
+
+        function calculateStreakForDate(dateStr) {
+            let streak = 0, date = new Date(dateStr);
+            while (localStorage.getItem(getUserPrefix() + date.toDateString() + '_complete')) {
+                streak++; date.setDate(date.getDate() - 1);
+                if (streak > 365) break;
+            }
+            return streak;
+        }
+
+        function prevMonth() { currentMonth--; if (currentMonth < 0) { currentMonth = 11; currentYear--; } loadCalendar(); }
+        function nextMonth() { currentMonth++; if (currentMonth > 11) { currentMonth = 0; currentYear++; } loadCalendar(); }
+
+        document.addEventListener('keypress', e => {
+            if (e.key === 'Enter') {
+                if (document.getElementById('loginForm').classList.contains('active')) handleLogin();
+                else handleSignup();
+            }
+        });
+
+        TASKS.forEach(task => document.getElementById(task)?.addEventListener('change', updateSaveButton));
+    </script>
+</body>
+</html>
